@@ -2,9 +2,11 @@
 
 import Image from "next/image";
 import styles from "./page.module.css";
-import { firestore, auth } from '@/firebase';
+import { auth } from '@/firebase';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { onAuthStateChanged } from "firebase/auth";
 
 export default function Home() {
 
@@ -13,6 +15,20 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
+
+  const router = useRouter();
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setIsSignedIn(true); // User is signed in
+        router.push("/classes"); // Redirect to classes page after sign-in
+      } else {
+        setIsSignedIn(false); // User is signed out
+      }
+    });
+    return () => unsubscribe();
+  }, [router]);
 
   const handleAuth = () => {
     if (isSignUp) {
@@ -60,19 +76,27 @@ export default function Home() {
             onChange={(e) => setPassword(e.target.value)}
           />
           <button onClick={handleAuth}>{isSignUp ? "Sign Up" : "Sign In"}</button>
-
-          <p>{isSignUp ? "Already have an account?" : "Don't have an account?"} 
+  
+          <p>
+            {isSignUp ? "Already have an account?" : "Don't have an account?"}
             <button onClick={() => setIsSignUp(!isSignUp)}>
               {isSignUp ? "Sign In" : "Sign Up"}
             </button>
           </p>
-
+  
           {error && <p style={{ color: "red" }}>{error}</p>}
         </div>
       ) : (
         <div>
           <h2>Welcome! You are signed in.</h2>
-          <button onClick={() => auth.signOut().then(() => setIsSignedIn(false))}>Sign Out</button>
+          <button onClick={() => router.push("/classes")}>Go to Classes</button>
+          <button onClick={() => router.push("/admin")}>Go to Admin Panel</button>
+          <button onClick={() => auth.signOut().then(() => {
+            setIsSignedIn(false);
+            router.push("/"); // Redirect to Home page after sign out
+          })}>
+            Sign Out
+          </button>
         </div>
       )}
     </div>

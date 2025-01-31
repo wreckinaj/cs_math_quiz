@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { firestore } from "@/firebase";
 import { collection, getDocs } from "firebase/firestore";
-import Quiz from "@/components/quiz";
+import Quiz from "@/components/Quiz";
 
 const ClassList = () => {
   const [classes, setClasses] = useState<any[]>([]);
