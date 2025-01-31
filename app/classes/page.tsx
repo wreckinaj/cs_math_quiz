@@ -1,3 +1,5 @@
+"use client";
+
 import ClassList from "@/components/ClassList";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
